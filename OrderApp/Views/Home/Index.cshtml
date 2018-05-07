@@ -1,0 +1,269 @@
+﻿<div id="tableBlockOrder"></div>
+<div id="createBlockOrder">
+    <button id="addOrder">Добавление заказа</button>
+</div>
+<div id="tableBlockOrderItem"></div>
+<div id="editBlockOrderItem">
+    <p><b>Редактирование заказа</b></p>
+    <table>
+        <tr><td><input type="hidden" id="editId" /></td><td></td></tr>
+        <tr><td><label>Название: </label></td><td><input type="text" id="editTitle" /></td></tr>
+        <tr><td><label>Количество: </label></td><td><input type="number" id="editCount" /></td></tr>
+        <tr><td><label>Сумма: </label></td><td><input type="number" id="editAmount" /></td></tr>
+        <tr><td><label>Номер заказа: </label></td><td><input type="number" id="editorderId" /></td></tr>
+    </table>
+    <button id="editOrderItem">Сохранить</button>
+</div>
+<div id="createBlockOrderItem">
+    <p><b>Добавление вещи для заказа</b></p>
+    <table>
+        <tr><td><label>Название: </label></td><td><input type="text" id="addTitle" /></td></tr>
+        <tr><td><label>Количество: </label></td><td><input type="number" id="addCount" /></td></tr>
+        <tr><td><label>Сумма: </label></td><td><input type="number" id="addAmount" /></td></tr>
+        <tr><td><label>Номер заказа: </label></td><td><input type="number" id="addorderId" /></td></tr>
+    </table>
+    <button id="addOrderItem">Сохранить</button>
+</div>
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            console.log('start');
+            GetAllOrders();
+            GetAllOrderItems();
+
+            //$("#showOrder").click(function (event) {
+            //    event.preventDefault();
+            //    GetAllOrders();
+            //});
+            //$("#showOrderItem").click(function (event) {
+            //    event.preventDefault();
+            //    GetAllOrderItems();
+            //});
+
+            $("#editOrderItem").click(function (event) {
+                event.preventDefault();
+                EditOrderItem();
+            });
+
+            $("#addOrderItem").click(function (event) {
+                event.preventDefault();
+                AddOrderItem();
+            });
+
+            $("#addOrder").click(function (event) {
+                event.preventDefault();
+                AddOrder();
+            });
+
+        });
+        // Получение всех вещей по ajax-запросу
+        function GetAllOrderItems() {
+            console.log('startGetAllOrderItems');
+
+            $("#createBlockOrderItem").css('display', 'block');
+            $("#editBlockOrderItem").css('display', 'none');
+            $.ajax({
+                url: '/api/orderItems/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    console.log(data);
+                    WriteResponseOrderItems(data); 
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // Получение всех заказов по ajax-запросу
+        function GetAllOrders() {
+
+            $("#createBlockOrder").css('display', 'block');
+
+            $.ajax({
+                url: '/api/orders/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    WriteResponseOrders(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // Добавление новой вещи
+        function AddOrderItem() {
+            // получаем значения для добавляемой вещи
+            var OrderItem = {
+                Title: $('#addTitle').val(),
+                Count: $('#addCount').val(),
+                Amount: $('#addAmount').val(),
+                OrderId: $('#addorderId').val(),
+            };
+
+            $.ajax({
+                url: '/api/orderItems/',
+                type: 'POST',
+                data: JSON.stringify(OrderItem),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    GetAllOrderItems();
+                    GetAllOrders();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // Добавление нового заказа
+        function AddOrder() {
+            // получаем значения для добавляемого заказа
+            var Order = {
+
+            };
+
+            $.ajax({
+                url: '/api/orders/',
+                type: 'POST',
+                data: JSON.stringify(Order),
+                contentType: "application/json;charset=utf-8",
+                success: function (Order) {
+                    GetAllOrders();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // Удаление заказа
+        function DeleteOrder(id) {
+
+            $.ajax({
+                url: '/api/orders/' + id,
+                type: 'DELETE',
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    GetAllOrders();
+                    GetAllOrderItems();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // Удаление вещи
+        function DeleteOrderItem(id) {
+
+            $.ajax({
+                url: '/api/orderItems/' + id,
+                type: 'DELETE',
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    GetAllOrderItems();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // редактирование вещи
+        function EditOrderItem() {
+            var id = $('#editId').val()
+            // получаем новые значения для вещи
+            var orderItem= {
+                Id: $('#editId').val(),
+                Title: $('#editTitle').val(),
+                Count: $('#editCount').val(),
+                Amount: $('#editAmount').val(),
+                OrderId: $('#editorderId').val(),
+            };
+            console.log(orderItem);
+            $.ajax({
+                url: '/api/orderItems/' + id,
+                type: 'PUT',
+                data: JSON.stringify(orderItem),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    
+                    GetAllOrderItems();
+                    GetAllOrders();
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+        // вывод полученных данных на экран
+        function WriteResponseOrderItems(orderItems) {
+            var strResult = "<table><th>ID</th><th>Название</th><th>Количество</th><th>Стоимость</th><th>ID заказа</th>";
+            $.each(orderItems, function (index, orderItem) {
+                strResult += "<tr><td>" + orderItem.Id + "</td><td> " + orderItem.Title + "</td><td>" +
+                    orderItem.Count + "</td><td>" + orderItem.Amount + "</td><td>" + orderItem.OrderId
+                    "</td><td><a id='editItem' data-item='" + orderItem.Id + "' onclick='EditItem(this);' >Редактировать</a></td>" +
+                    "<td><a id='delItem' data-item='" + orderItem.Id + "' onclick='DeleteItem(this);' >Удалить</a></td></tr>";
+            });
+            strResult += "</table>";
+            $("#tableBlockOrderItem").html(strResult);
+        }
+
+            function WriteResponseOrders(orders) {
+                var strResult = "<table><th>ID</th><th>Стоимость</th>";
+                $.each(orders, function (index, order) {
+                    strResult += "<tr><td>" + order.Id + "</td><td> "  +
+                        order.Amount +
+                        "<td><a id='delOrd' data-item='" + order.Id + "' onclick='DeleteOrd(this);' >Удалить</a></td></tr>";
+                });
+                strResult += "</table>";
+                $("#tableBlockOrder").html(strResult);
+        }
+        // обработчик удаления
+        function DeleteItem(el) {
+            // получаем id удаляемого объекта
+            var id = $(el).attr('data-item');
+            DeleteOrderItem(id);
+        }
+        // обработчик редактирования
+        function EditItem(el) {
+            // получаем id редактируемого объекта
+            var id = $(el).attr('data-item');
+            GetOrderItem(id);
+        }
+            // обработчик удаления заказа
+            function DeleteOrd(el) {
+                // получаем id удаляемого объекта
+                var id = $(el).attr('data-item');
+                DeleteOrder(id);
+            }
+        // вывод данных редактируемой вещи в поле
+        function ShowOrderItem(orderItem) {
+            if (orderItem != null) {
+                $("#createBlockOrderItem").css('display', 'none');
+                $("#editBlockOrderItem").css('display', 'block');
+                $("#editId").val(orderItem.Id);
+                $("#editTitle").val(orderItem.Title);
+                $("#editCount").val(orderItem.Count);
+                $("#editAmount").val(orderItem.Amount);
+                $("#editorderId").val(orderItem.OrderId);
+            }
+            else {
+                alert("Такая книга не существует");
+            }
+        }
+        // запрос книги на редактирование
+        function GetOrderItem(id) {
+            $.ajax({
+                url: '/api/orderItems/' + id,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    ShowOrderItem(data);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+    </script>
+}

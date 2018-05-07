@@ -1,0 +1,26 @@
+﻿div {
+    display: inline-block;
+    margin: 20px;
+}
+
+#tableBlockOrder {
+    width: auto;
+}
+
+
+#createBlockOrder {
+    float: right;
+}
+
+#tableBlockOrderItem {
+    width: auto;
+}
+
+#editBlockOrderItem {
+    display: none;
+    float: right;
+}
+
+#createBlockOrderItem {
+    float: right;
+}
